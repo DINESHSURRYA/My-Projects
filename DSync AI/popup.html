@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Summarizer & Chatbot</title>
+  <script defer src="popup.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 440px;
+      height: 600px;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* The border container */
+    .extension-box {
+      border: 4px solid #000;
+      border-radius: 20px;
+      padding: 20px;
+      width: 95%;
+      max-height: 95%;
+      overflow-y: auto;
+      background: linear-gradient(270deg, #f9e79f, #fadbd8, #d5f5e3, #d6eaf8, #f9e79f);
+      background-size: 800% 800%;
+      animation: vibrantGradient 12s ease infinite;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      color: #333;
+    }
+
+    @keyframes vibrantGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Vibrant Animated Title */
+    h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      background: linear-gradient(45deg, #ff00cc, #3333ff, #00ffcc, #ffcc00);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: titleGradient 6s ease infinite, neon-glow 1.5s infinite alternate;
+      margin-bottom: 1.5rem;
+    }
+
+    @keyframes titleGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes neon-glow {
+      from { text-shadow: 0 0 10px rgba(255, 0, 204, 0.6), 0 0 20px rgba(51, 51, 255, 0.6); }
+      to { text-shadow: 0 0 15px rgba(255, 0, 204, 1), 0 0 30px rgba(51, 51, 255, 1); }
+    }
+
+    .button-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      font-weight: bold;
+      padding: 14px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      color: #fff;
+      width: 100%;
+      transition: transform 0.3s, background-color 0.3s;
+      text-align: center;
+    }
+
+    /* Vibrant Colorful Buttons */
+    #copy-btn { background: linear-gradient(45deg, #2193b0, #6dd5ed); }
+    #save-txt-btn { background: linear-gradient(45deg, #cc2b5e, #753a88); }
+    #save-doc-btn { background: linear-gradient(45deg, #ee9ca7, #ffdde1); color: #333; }
+    #share-btn { background: linear-gradient(45deg, #f12711, #f5af19); }
+    #sendChat { background: linear-gradient(45deg, #00b09b, #96c93d); }
+    #exportChat { background: linear-gradient(45deg, #373B44, #4286f4); }
+    #clearChat { background: linear-gradient(45deg, #654ea3, #eaafc8); }
+
+    button:hover {
+      filter: brightness(1.2);
+      transform: scale(1.05);
+    }
+
+    /* Animations */
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes slide { 0% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 100% { transform: translateX(0); } }
+
+    .pulse { animation: pulse 2s infinite; }
+    .bounce { animation: bounce 2s infinite; }
+    .shake { animation: shake 2s infinite; }
+    .float { animation: float 3s infinite; }
+    .slide { animation: slide 3s infinite; }
+
+    #summary {
+      background-color: #ffffffdd;
+      padding: 15px;
+      border-radius: 15px;
+      height: 150px;
+      overflow-y: auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    #chatInput {
+      width: 100%;
+      padding: 12px;
+      border-radius: 15px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      background-color: #fff;
+      color: #333;
+    }
+
+    ol {
+      background-color: #ffffffdd;
+      padding: 15px;
+      border-radius: 15px;
+      height: 150px;
+      overflow-y: auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      list-style-position: inside;
+      color: #333;
+    }
+
+    ol li {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="extension-box">
+    <h1>DSync AI</h1>
+
+    <!-- Summary Section -->
+    <div id="summary">Fetching summary...</div>
+
+    <!-- Action Buttons -->
+    <div class="button-container">
+      <button id="copy-btn" class="pulse">Copy Summary</button>
+      <button id="save-txt-btn" class="bounce">Save as Text</button>
+      <button id="save-doc-btn" class="shake">Save as Word</button>
+      <button id="share-btn" class="slide">Share</button>
+    </div>
+
+    <!-- Chat Input -->
+    <input type="text" id="chatInput" placeholder="Ask Gemini based on summary...">
+    <button id="sendChat" class="float">Ask Gemini</button>
+
+    <!-- Chat Output -->
+    <ol id="chatOutput"></ol>
+
+    <!-- Chat Export & Clear -->
+    <div class="button-container">
+      <button id="exportChat" class="pulse">Export Chat</button>
+      <button id="clearChat" class="shake">Delete Chat</button>
+    </div>
+  </div>
+</body>
+
+</html>
